@@ -1,98 +1,156 @@
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:quiz_app/screens/result_page.dart';
 
 import '../data/questions_listpage.dart';
 
 class Quiz_Screen extends StatefulWidget {
-  const Quiz_Screen({super.key});
+  const Quiz_Screen({Key? key}) : super(key: key);
 
   @override
-  State<Quiz_Screen> createState() => _Quiz_ScreenState();
+  _QuizzScreenState createState() => _QuizzScreenState();
 }
 
-class _Quiz_ScreenState extends State<Quiz_Screen> {
-
-  PageController? _questioncontroller;
-  int question_pos=0;
-  int score=0;
-  bool buttonPressed=false;
-  String btnText= "Next Question";
-  bool answered=false;
-
+class _QuizzScreenState extends State<Quiz_Screen> {
+  int question_pos = 0;
+  int score = 0;
+  bool btnPressed = false;
+  PageController? _controller;
+  String btnText = "Next Question";
+  bool answered = false;
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
-    _questioncontroller=PageController(initialPage: 0);
+    _controller = PageController(initialPage: 0);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(backgroundColor: Colors.deepPurple,
-    body: PageView.builder(itemCount: questions.length,
-        controller: _questioncontroller!,
-    onPageChanged: (page){
-      if(page==questions.length -1){
-        setState(() {
-          btnText= "See Result";
-        });
-      }
-      setState(() {
-        answered= false;
-      });
-    },
-      physics: new NeverScrollableScrollPhysics(),
-      itemBuilder: (context,index){
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-              width: double.infinity,
-              child: Text("Question ${index + 1}/10")),
-
-          Divider(color: Colors.redAccent,),
-          SizedBox(height: 15,),
-          
-          Text("${questions[index].question}"),
-
-          for(int i=0;i<questions[index].answers!.length;i++)
-            Container(
-              child: RawMaterialButton(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                onPressed: !answered? () {
-                  if(questions[index].answers!.values.toList()[i]){
-                    score++;
-                    print("Yes");
-                  }else{
-                    print("No");
-                  }
-                  setState(() {
-                    buttonPressed=true;
-                    answered=true;
-                  });
-                }
-                :null,
-                child: Text(questions[index].answers!.keys.toList()[i]),
-              ),
-            ),
-          SizedBox(height: 10,),
-          RawMaterialButton(onPressed: (){
-            if(_questioncontroller!.page?.toInt()==questions.length-1){
-              Navigator.push(context, MaterialPageRoute(builder: (context)=> ResultScreen(score)));
-            }
-            else{
-              _questioncontroller!.nextPage(duration: Duration(milliseconds: 300), curve: Curves.easeInExpo);
-
+    return Scaffold(
+      backgroundColor: Colors.deepPurple,
+      body: Padding(
+          padding: const EdgeInsets.all(18.0),
+          child: PageView.builder(
+            controller: _controller!,
+            onPageChanged: (page) {
+              if (page == questions.length - 1) {
+                setState(() {
+                  btnText = "See Results";
+                });
+              }
               setState(() {
-                buttonPressed=false;
+                answered = false;
               });
-            }
-          }
-          ),
-        ],
-      );
-      }
-    ),
+            },
+            physics: new NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: Text(
+                      "Question ${index + 1}/10",
+                      textAlign: TextAlign.start,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28.0,
+                      ),
+                    ),
+                  ),
+                  Divider(
+                    color: Colors.white,
+                  ),
+                  SizedBox(
+                    height: 10.0,
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 200.0,
+                    child: Text(
+                      "${questions[index].question}",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22.0,
+                      ),
+                    ),
+                  ),
+                  for (int i = 0; i < questions[index].answers!.length; i++)
+                    Container(
+                      width: double.infinity,
+                      height: 50.0,
+                      margin: EdgeInsets.only(
+                          bottom: 20.0, left: 12.0, right: 12.0),
+                      child: RawMaterialButton(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        fillColor: btnPressed
+                            ? questions[index].answers!.values.toList()[i]
+                            ? Colors.green
+                            : Colors.red
+                            : Colors.blueAccent,
+                        onPressed: !answered
+                            ? () {
+                          if (questions[index]
+                              .answers!
+                              .values
+                              .toList()[i]) {
+                            score++;
+                            print("yes");
+                          } else {
+                            print("no");
+                          }
+                          setState(() {
+                            btnPressed = true;
+                            answered = true;
+                          });
+                        }
+                            : null,
+                        child: Text(questions[index].answers!.keys.toList()[i],
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18.0,
+                            )),
+                      ),
+                    ),
+                  SizedBox(
+                    height: 40.0,
+                  ),
+                  RawMaterialButton(
+                    onPressed: () {
+                      if (_controller!.page?.toInt() == questions.length - 1) {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ResultScreen(score)));
+                      } else {
+                        _controller!.nextPage(
+                            duration: Duration(milliseconds: 250),
+                            curve: Curves.easeInExpo);
+
+                        setState(() {
+                          btnPressed = false;
+                        });
+                      }
+                    },
+                    shape: StadiumBorder(),
+                    fillColor: Colors.blue,
+                    padding: EdgeInsets.all(18.0),
+                    elevation: 0.0,
+                    child: Text(
+                      btnText,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )
+                ],
+              );
+            },
+            itemCount: questions.length,
+          )),
     );
   }
 }
